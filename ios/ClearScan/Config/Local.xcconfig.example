@@ -1,0 +1,6 @@
+// Copy to Local.xcconfig and replace every example value.
+
+PRODUCT_BUNDLE_IDENTIFIER = com.example.ClearScan
+DEVELOPMENT_TEAM = YOUR_APPLE_TEAM_ID
+GOOGLE_IOS_CLIENT_ID = YOUR_IOS_CLIENT_ID.apps.googleusercontent.com
+GOOGLE_IOS_REVERSED_CLIENT_ID = com.googleusercontent.apps.YOUR_IOS_CLIENT_ID

@@ -1,0 +1,46 @@
+# macOS and editor state
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# JavaScript dependencies and generated output
+node_modules/
+dist/
+test-results/
+playwright-report/
+coverage/
+
+# Local environment and authentication configuration
+.env
+.env.*
+!.env.example
+web/.env
+web/.env.*
+!web/.env.example
+ios/ClearScan/Config/Local.xcconfig
+
+# Apple signing and per-user Xcode state
+*.cer
+*.key
+*.mobileprovision
+*.p12
+*.pem
+*.xcresult
+*.xcuserstate
+xcuserdata/
+DerivedData/
+.build/
+
+# User-created documents and local API persistence
+data/
+
+# Local research, build harnesses, and collaborator sandboxes
+work/
+minjun/
+references/
+tmp/
+
+# Host-specific deployment metadata
+.openai/

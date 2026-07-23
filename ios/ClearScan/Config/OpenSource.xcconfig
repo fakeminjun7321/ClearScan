@@ -1,0 +1,9 @@
+// Safe defaults committed to the public repository.
+// Local.xcconfig is optional and ignored by Git.
+
+PRODUCT_BUNDLE_IDENTIFIER = org.clearscan.app
+DEVELOPMENT_TEAM =
+GOOGLE_IOS_CLIENT_ID = GOOGLE_IOS_CLIENT_ID_REQUIRED
+GOOGLE_IOS_REVERSED_CLIENT_ID = GOOGLE_IOS_REVERSED_CLIENT_ID_REQUIRED
+
+#include? "Local.xcconfig"

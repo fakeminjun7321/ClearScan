@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  web-and-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check:runtime
+      - run: npm run check:web
+      - run: npm run test:backend
+      - run: npm run test:sites
+      - run: npm run build
+      - run: npm run test:web
+      - run: MOBILE_RUNTIME_TEST_PORT=4197 npm run test:runtime
+
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        working-directory: ios/ClearScan
+        run: xcodegen generate
+      - name: Select simulator
+        id: simulator
+        run: |
+          simulator_id="$(
+            xcrun simctl list devices available -j |
+              jq -r '[.devices[][] | select(.isAvailable == true and (.name | startswith("iPhone")))][0].udid'
+          )"
+          test -n "$simulator_id"
+          echo "id=$simulator_id" >> "$GITHUB_OUTPUT"
+      - name: Native unit tests
+        working-directory: ios/ClearScan
+        run: |
+          xcodebuild test \
+            -project ClearScan.xcodeproj \
+            -scheme ClearScan \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.id }}' \
+            -only-testing:ClearScanTests \
+            CODE_SIGNING_ALLOWED=NO
