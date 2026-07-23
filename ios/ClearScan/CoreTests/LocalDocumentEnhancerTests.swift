@@ -215,16 +215,26 @@ final class LocalDocumentEnhancerTests: XCTestCase {
       .translatedToOrigin()
     let width = Int(scaled.extent.width.rounded(.down))
     let height = Int(scaled.extent.height.rounded(.down))
-    var pixels = [UInt8](repeating: 0, count: width * height)
-    pixels.withUnsafeMutableBytes { bytes in
+    let rowBytes = (width + 3) & ~3
+    var paddedPixels = [UInt8](repeating: 0, count: rowBytes * height)
+    paddedPixels.withUnsafeMutableBytes { bytes in
       guard let base = bytes.baseAddress else { return }
       context.render(
         scaled,
         toBitmap: base,
-        rowBytes: width,
+        rowBytes: rowBytes,
         bounds: CGRect(x: 0, y: 0, width: width, height: height),
         format: .L8,
         colorSpace: CGColorSpaceCreateDeviceGray()
+      )
+    }
+    var pixels = [UInt8](repeating: 0, count: width * height)
+    for y in 0 ..< height {
+      let sourceStart = y * rowBytes
+      let destinationStart = y * width
+      pixels.replaceSubrange(
+        destinationStart ..< destinationStart + width,
+        with: paddedPixels[sourceStart ..< sourceStart + width]
       )
     }
     return (pixels, width, height)

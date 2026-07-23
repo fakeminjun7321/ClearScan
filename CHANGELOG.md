@@ -34,6 +34,14 @@ All notable ClearScan changes are documented here. The project follows
 - The supplied ambiguous book PDF was replayed offline: detected document area
   increased from 27.7% to 98.5% and the inferred gutter was 65.9%.
 
+### Fixed
+
+- Aligned single-channel Core Image bitmap rows on every width, preventing
+  empty blur-analysis and selection-mask buffers on some simulator runtimes.
+- Made the cross-runtime OCR smoke test accept harmless whitespace and
+  punctuation differences while still requiring the same English, Korean, and
+  numeric content.
+
 ### Known limitations
 
 - Physical-device camera detection, automatic capture timing, audible silence,

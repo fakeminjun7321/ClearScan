@@ -183,16 +183,23 @@ public final class SelectionEraseProcessor: @unchecked Sendable {
       by: CGAffineTransform(
         scaleX: CGFloat(width) / extent.width, y: CGFloat(height) / extent.height)
     )
-    var bytes = [UInt8](repeating: 0, count: width * height)
+    let rowBytes = (width + 3) & ~3
+    var bytes = [UInt8](repeating: 0, count: rowBytes * height)
     context.render(
       sampled,
       toBitmap: &bytes,
-      rowBytes: width,
+      rowBytes: rowBytes,
       bounds: CGRect(x: 0, y: 0, width: width, height: height),
       format: .L8,
       colorSpace: nil
     )
-    let activeCount = bytes.reduce(0) { $0 + ($1 >= 32 ? 1 : 0) }
-    return Double(activeCount) / Double(max(bytes.count, 1))
+    var activeCount = 0
+    for y in 0 ..< height {
+      let rowStart = y * rowBytes
+      for x in 0 ..< width where bytes[rowStart + x] >= 32 {
+        activeCount += 1
+      }
+    }
+    return Double(activeCount) / Double(max(width * height, 1))
   }
 }

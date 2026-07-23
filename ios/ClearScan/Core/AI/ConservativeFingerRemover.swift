@@ -126,29 +126,40 @@ public final class ConservativeFingerRemover: @unchecked Sendable {
     let sampled = source.transformed(
       by: CGAffineTransform(scaleX: CGFloat(width) / source.extent.width, y: CGFloat(height) / source.extent.height)
     )
-    var bytes = [UInt8](repeating: 0, count: width * height)
+    let rowBytes = (width + 3) & ~3
+    var bytes = [UInt8](repeating: 0, count: rowBytes * height)
     context.render(
       sampled,
       toBitmap: &bytes,
-      rowBytes: width,
+      rowBytes: rowBytes,
       bounds: CGRect(x: 0, y: 0, width: width, height: height),
       format: .L8,
       colorSpace: nil
     )
 
-    let activeCount = bytes.reduce(0) { $0 + ($1 >= 128 ? 1 : 0) }
+    var activeCount = 0
+    for y in 0 ..< height {
+      let rowStart = y * rowBytes
+      for x in 0 ..< width where bytes[rowStart + x] >= 128 {
+        activeCount += 1
+      }
+    }
     guard activeCount > 0 else { return (0, false) }
     let edgeWidth = max(1, min(width, height) / 25)
     var edgeCount = 0
     for y in 0 ..< height {
-      for x in 0 ..< width where bytes[y * width + x] >= 128 {
+      let rowStart = y * rowBytes
+      for x in 0 ..< width where bytes[rowStart + x] >= 128 {
         if x < edgeWidth || x >= width - edgeWidth || y < edgeWidth || y >= height - edgeWidth {
           edgeCount += 1
         }
       }
     }
     let meaningfulEdgeContact = edgeCount >= max(2, activeCount / 1_000)
-    return (Double(activeCount) / Double(bytes.count), meaningfulEdgeContact)
+    return (
+      Double(activeCount) / Double(max(width * height, 1)),
+      meaningfulEdgeContact
+    )
   }
 
   private func repairedImage(source: CIImage, mask: CIImage) throws -> CGImage {

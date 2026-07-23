@@ -138,7 +138,13 @@ final class OnDeviceDocumentAIEnsembleTests: XCTestCase {
     let result = try ai.recognizeText(in: image)
 
     let elapsed = ProcessInfo.processInfo.systemUptime - start
-    XCTAssertTrue(result.text.localizedCaseInsensitiveContains("ClearScan"))
+    let normalizedText = result.text
+      .lowercased()
+      .filter(\.isLetter)
+    XCTAssertTrue(
+      normalizedText.contains("clearscan"),
+      "Expected ClearScan text in: \(result.text)"
+    )
     XCTAssertTrue(
       result.text.contains("문서") || result.text.contains("스캔"),
       "Expected Korean text in: \(result.text)"

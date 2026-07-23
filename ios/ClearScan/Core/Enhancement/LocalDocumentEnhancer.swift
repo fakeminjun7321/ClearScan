@@ -163,13 +163,14 @@ public final class LocalDocumentEnhancer:
             throw DocumentEnhancementError.analysisFailed
         }
 
-        var pixels = [UInt8](repeating: 0, count: width * height)
+        let rowBytes = (width + 3) & ~3
+        var pixels = [UInt8](repeating: 0, count: rowBytes * height)
         pixels.withUnsafeMutableBytes { bytes in
             guard let baseAddress = bytes.baseAddress else { return }
             context.render(
                 analysisImage,
                 toBitmap: baseAddress,
-                rowBytes: width,
+                rowBytes: rowBytes,
                 bounds: CGRect(x: 0, y: 0, width: width, height: height),
                 format: .L8,
                 colorSpace: analysisColorSpace
@@ -180,13 +181,13 @@ public final class LocalDocumentEnhancer:
         var edgeCount = 0
         let gradientThreshold = 10
         for y in 1 ..< (height - 1) {
-            let row = y * width
+            let row = y * rowBytes
             for x in 1 ..< (width - 1) {
                 let index = row + x
                 let left = Int(pixels[index - 1])
                 let right = Int(pixels[index + 1])
-                let down = Int(pixels[index - width])
-                let up = Int(pixels[index + width])
+                let down = Int(pixels[index - rowBytes])
+                let up = Int(pixels[index + rowBytes])
                 let gradient = abs(right - left) + abs(up - down)
                 guard gradient >= gradientThreshold else { continue }
 
