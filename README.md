@@ -25,6 +25,7 @@ UIKit, AVFoundation, Vision, SwiftData, FileManager를 중심으로 구성되어
 - AVFoundation 영상 프레임을 사용하는 완전 무음 경로와 선택형 고화질 촬영
 - Vision 문서 분할 + 사각형 검출 + 대비 강화 fallback
 - WeScan에서 영감을 받은 최근 프레임 합의와 원형 자동촬영 진행률
+- 잘린 문서는 주황색 윤곽으로 안내하되 자동촬영을 막는 안전 게이트
 - 프레임을 꽉 채우고 책등이 치우친 애매한 펼침면 복구
 - 원근 보정, 중앙 책등 자동 추정·수동 조절, 좌우 페이지 순서 저장
 - SwiftData 메타데이터 + FileManager 페이지 파일

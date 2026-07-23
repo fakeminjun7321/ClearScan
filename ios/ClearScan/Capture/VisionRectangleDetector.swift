@@ -15,15 +15,20 @@ struct RectangleCandidate: Sendable {
   let quadrilateral: DocumentQuadrilateral
   let confidence: Float
   let source: RectangleDetectionSource
+  /// The outline may be shown for framing/manual crop, but it is unsafe for
+  /// automatic capture because the document visibly leaves the camera frame.
+  let suppressesAutoCapture: Bool
 
   init(
     quadrilateral: DocumentQuadrilateral,
     confidence: Float,
-    source: RectangleDetectionSource = .rectangle
+    source: RectangleDetectionSource = .rectangle,
+    suppressesAutoCapture: Bool = false
   ) {
     self.quadrilateral = quadrilateral
     self.confidence = confidence
     self.source = source
+    self.suppressesAutoCapture = suppressesAutoCapture
   }
 }
 
@@ -324,13 +329,34 @@ final class VisionRectangleDetector {
           count += 1
         }
       }
-      guard allowBorderFilling || borderTouches < 3 else { return nil }
+      let nearBorderTouches = points.reduce(into: 0) { count, point in
+        if point.x < 0.025 || point.x > 0.975 || point.y < 0.025 || point.y > 0.975 {
+          count += 1
+        }
+      }
+      // Keep a partially clipped page as a visible framing aid when at least
+      // one corner is clearly anchored inside the frame. Reject the common
+      // border-hugging segmentation hallucination that has no interior anchor.
+      let maximumCornerMargin =
+        points.map { point in
+          min(point.x, 1 - point.x, point.y, 1 - point.y)
+        }.max() ?? 0
+      guard allowBorderFilling
+        || borderTouches < 3
+        || maximumCornerMargin >= 0.08
+      else { return nil }
       let borderPenalty: CGFloat
+      let suppressesAutoCapture: Bool
       switch allowBorderFilling ? 0 : borderTouches {
+      case 3...:
+        borderPenalty = 0.35
+        suppressesAutoCapture = !allowBorderFilling
       case 2:
         borderPenalty = 0.72
+        suppressesAutoCapture = !allowBorderFilling
       default:
         borderPenalty = 1.0
+        suppressesAutoCapture = !allowBorderFilling && nearBorderTouches >= 2
       }
 
       let confidence = max(observation.confidence, 0.20)
@@ -343,7 +369,8 @@ final class VisionRectangleDetector {
         candidate: RectangleCandidate(
           quadrilateral: quadrilateral,
           confidence: confidence,
-          source: scoredObservation.source
+          source: scoredObservation.source,
+          suppressesAutoCapture: suppressesAutoCapture
         ),
         score: score
       )
@@ -362,6 +389,7 @@ struct RectangleStabilityTracker {
   private var samples: [Sample] = []
   private var displayedQuadrilateral: DocumentQuadrilateral?
   private var lastProgress: CGFloat = 0
+  private var lastRequiresRepositioning = false
   private var missedFrames = 0
 
   // This is an independent normalized-coordinate implementation of the
@@ -401,7 +429,8 @@ struct RectangleStabilityTracker {
         quadrilateral: displayedQuadrilateral,
         confidence: 0,
         stabilityProgress: lastProgress,
-        isStable: false
+        isStable: false,
+        requiresRepositioning: lastRequiresRepositioning
       )
     }
 
@@ -414,11 +443,13 @@ struct RectangleStabilityTracker {
     guard let cluster = bestCluster() else {
       displayedQuadrilateral = candidate.quadrilateral
       lastProgress = 0
+      lastRequiresRepositioning = candidate.suppressesAutoCapture
       return detection(
         quadrilateral: candidate.quadrilateral,
         confidence: candidate.confidence,
         progress: 0,
-        isStable: false
+        isStable: false,
+        requiresRepositioning: candidate.suppressesAutoCapture
       )
     }
 
@@ -437,11 +468,13 @@ struct RectangleStabilityTracker {
     // but the ring immediately stops until the new page forms a consensus.
     guard currentMatchesDisplayCluster else {
       lastProgress = 0
+      lastRequiresRepositioning = candidate.suppressesAutoCapture
       return detection(
         quadrilateral: displayedQuadrilateral ?? representative,
         confidence: candidate.confidence,
         progress: 0,
-        isStable: false
+        isStable: false,
+        requiresRepositioning: candidate.suppressesAutoCapture
       )
     }
 
@@ -469,21 +502,50 @@ struct RectangleStabilityTracker {
       ? candidate.confidence
       : tightMatches.reduce(Float.zero) { $0 + $1.candidate.confidence }
         / Float(tightMatches.count)
-    let progress = min(
+    let rawProgress = min(
       CGFloat(tightMatches.count) / CGFloat(requiredAutoCaptureConsensus),
       1
     )
+    let requiresRepositioning =
+      candidate.suppressesAutoCapture
+      || tightMatches.contains { $0.candidate.suppressesAutoCapture }
+    // A slowly drifting page can satisfy every adjacent-frame comparison.
+    // Compare the oldest and newest consensus samples to bound total motion.
+    let consensusSpanSettled: Bool
+    if let oldestTight = tightMatches.min(by: { $0.timestamp < $1.timestamp }),
+      let newestTight = tightMatches.max(by: { $0.timestamp < $1.timestamp })
+    {
+      consensusSpanSettled =
+        oldestTight.candidate.quadrilateral.maximumCornerDistance(
+          to: newestTight.candidate.quadrilateral
+        ) <= autoCaptureCornerTolerance
+    } else {
+      consensusSpanSettled = true
+    }
+    let confidenceReady = meanConfidence >= minimumMeanConfidence
+    let progress: CGFloat
+    if requiresRepositioning {
+      progress = 0
+    } else if !currentMatchesAutoCluster || !consensusSpanSettled || !confidenceReady {
+      progress = min(rawProgress, 0.85)
+    } else {
+      progress = rawProgress
+    }
     lastProgress = progress
+    lastRequiresRepositioning = requiresRepositioning
     let isStable =
       currentMatchesAutoCluster
       && tightMatches.count >= requiredAutoCaptureConsensus
-      && meanConfidence >= minimumMeanConfidence
+      && confidenceReady
+      && consensusSpanSettled
+      && !requiresRepositioning
 
     return detection(
       quadrilateral: displayedQuadrilateral ?? representative,
       confidence: meanConfidence,
       progress: progress,
-      isStable: isStable
+      isStable: isStable,
+      requiresRepositioning: requiresRepositioning
     )
   }
 
@@ -491,6 +553,7 @@ struct RectangleStabilityTracker {
     samples.removeAll(keepingCapacity: true)
     displayedQuadrilateral = nil
     lastProgress = 0
+    lastRequiresRepositioning = false
     missedFrames = 0
   }
 
@@ -581,13 +644,15 @@ struct RectangleStabilityTracker {
     quadrilateral: DocumentQuadrilateral,
     confidence: Float,
     progress: CGFloat,
-    isStable: Bool
+    isStable: Bool,
+    requiresRepositioning: Bool = false
   ) -> LiveRectangleDetection {
     LiveRectangleDetection(
       quadrilateral: quadrilateral,
       confidence: confidence,
       stabilityProgress: progress,
-      isStable: isStable
+      isStable: isStable,
+      requiresRepositioning: requiresRepositioning
     )
   }
 }

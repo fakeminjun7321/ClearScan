@@ -54,6 +54,7 @@
 		A16B0252305E24816D27F5D5 /* GoogleWorkspaceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48126A7CA1A86F93F0051EB5 /* GoogleWorkspaceViewController.swift */; };
 		A4EC17D5ABF45CB0169AD8A8 /* ChromaticInkRemover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0ADEED8A70624C3940D3D7 /* ChromaticInkRemover.swift */; };
 		A5F3781285F4D23C17CBA3CE /* GoogleWorkspaceServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22F3ADC0CC335E534E1E1BD /* GoogleWorkspaceServiceTests.swift */; };
+		A66BAC06AFC75C6C3F90CC1C /* DetectionBehaviorUpgradeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2595C271198712A201BD470F /* DetectionBehaviorUpgradeTests.swift */; };
 		A7BBB57603F11CD19D655BCB /* ScannerPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 530FFFD7F355B031EBA1AB8B /* ScannerPreviewView.swift */; };
 		A9DD63E1424A6FF5ACDDA740 /* ScanImageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F719FED9A91CEDB35C7242A /* ScanImageStoreTests.swift */; };
 		AB86195884BB4D47F84ABAF3 /* ScanModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D63FD14B42D4B094AF463DE2 /* ScanModels.swift */; };
@@ -69,6 +70,7 @@
 		D01E396ACC7B60E95761DD89 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E629742D4FF1EA1279A238 /* SettingsViewController.swift */; };
 		D8294273D5580B6FECA130F5 /* DocumentScannerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3C41BFFFA866DF24AFE04A /* DocumentScannerModel.swift */; };
 		D97C8EB83B32B25723DDAEAD /* ScanExportSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82EAB4C9DC449991A7E37579 /* ScanExportSelection.swift */; };
+		EBDB71B3F5C6A34449F56EEB /* DetectionConditionMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9EF56FEDF898186AC20E1FC /* DetectionConditionMatrixTests.swift */; };
 		EE4C5AF6132319314E878571 /* BookPageDewarperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD598FBA4EC07EC3DBCA85B6 /* BookPageDewarperTests.swift */; };
 		F50421796C97C38106F2396B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A7A7B98D5F35C61DE4756B48 /* Assets.xcassets */; };
 		F6470C9290E52D52E33F8581 /* DocumentPageEditingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3825F40C8C54303236BDF7 /* DocumentPageEditingServiceTests.swift */; };
@@ -101,6 +103,7 @@
 		1F8187EF984A8F2D5938C3DD /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		21A17D0945D38A0054DFAA3B /* RootTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabBarController.swift; sourceTree = "<group>"; };
 		24A7A622B36462130A178F50 /* ClearScanTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ClearScanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2595C271198712A201BD470F /* DetectionBehaviorUpgradeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectionBehaviorUpgradeTests.swift; sourceTree = "<group>"; };
 		28C1602B840F03EC457EEB46 /* DocumentImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentImageProcessor.swift; sourceTree = "<group>"; };
 		312D1B2FEEBCE2F79ED4BAC0 /* ClearScanUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ClearScanUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		36E2ACBF7A46A9DD682E7E38 /* ZIPArchiveWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZIPArchiveWriterTests.swift; sourceTree = "<group>"; };
@@ -151,6 +154,7 @@
 		D49287A8B3AEE12AA692C3C9 /* UIKitAppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitAppEnvironment.swift; sourceTree = "<group>"; };
 		D63FD14B42D4B094AF463DE2 /* ScanModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanModels.swift; sourceTree = "<group>"; };
 		D6E629742D4FF1EA1279A238 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		D9EF56FEDF898186AC20E1FC /* DetectionConditionMatrixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectionConditionMatrixTests.swift; sourceTree = "<group>"; };
 		D9FEE460CC98CAC89D6EF76D /* LocalDocumentEnhancer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalDocumentEnhancer.swift; sourceTree = "<group>"; };
 		E25C67FDF88DC7F3D8468EA0 /* VisionRectangleDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionRectangleDetectorTests.swift; sourceTree = "<group>"; };
 		E9C0690083877B24DBF577FD /* DocumentOrientationEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentOrientationEstimator.swift; sourceTree = "<group>"; };
@@ -393,6 +397,8 @@
 				FD598FBA4EC07EC3DBCA85B6 /* BookPageDewarperTests.swift */,
 				44270A5FB5E3FE3DD3FA94D3 /* ChromaticInkRemoverTests.swift */,
 				950CF86092772D6B4AFE5B84 /* ConservativeFingerRemoverTests.swift */,
+				2595C271198712A201BD470F /* DetectionBehaviorUpgradeTests.swift */,
+				D9EF56FEDF898186AC20E1FC /* DetectionConditionMatrixTests.swift */,
 				646C25720AE173C0261F93CD /* DocumentContentAnalyzerTests.swift */,
 				67F9F71B64D8F6B83CF7E107 /* DocumentIlluminationNormalizerTests.swift */,
 				6123EDF860A60A5001251CC9 /* DocumentImageProcessorTests.swift */,
@@ -589,6 +595,8 @@
 				EE4C5AF6132319314E878571 /* BookPageDewarperTests.swift in Sources */,
 				07CE1FB6D31B0E8E6AA4D193 /* ChromaticInkRemoverTests.swift in Sources */,
 				869133E6597646D52182AB10 /* ConservativeFingerRemoverTests.swift in Sources */,
+				A66BAC06AFC75C6C3F90CC1C /* DetectionBehaviorUpgradeTests.swift in Sources */,
+				EBDB71B3F5C6A34449F56EEB /* DetectionConditionMatrixTests.swift in Sources */,
 				9DB016595CC80DF5A6F7241E /* DocumentContentAnalyzerTests.swift in Sources */,
 				5F193ACA92311A957F1E60C0 /* DocumentIlluminationNormalizerTests.swift in Sources */,
 				57852A61A0DCF87C6901BB01 /* DocumentImageProcessorTests.swift in Sources */,
