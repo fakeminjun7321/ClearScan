@@ -8,8 +8,24 @@ final class ScannerPreviewView: UIView {
   private var detection: LiveRectangleDetection?
   private var gutterRatio: CGFloat?
   private var videoRotationAngle: CGFloat = 90
+  private var sessionStartObserver: NSObjectProtocol?
 
   override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+
+  static func preferredVideoRotationAngle(for orientation: UIInterfaceOrientation) -> CGFloat {
+    switch orientation {
+    case .portrait:
+      return 90
+    case .portraitUpsideDown:
+      return 270
+    case .landscapeRight:
+      return 0
+    case .landscapeLeft:
+      return 180
+    default:
+      return 90
+    }
+  }
 
   var previewLayer: AVCaptureVideoPreviewLayer {
     guard let previewLayer = layer as? AVCaptureVideoPreviewLayer else {
@@ -50,6 +66,12 @@ final class ScannerPreviewView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
 
+  deinit {
+    if let sessionStartObserver {
+      NotificationCenter.default.removeObserver(sessionStartObserver)
+    }
+  }
+
   override func layoutSubviews() {
     super.layoutSubviews()
     if let connection = previewLayer.connection,
@@ -66,6 +88,22 @@ final class ScannerPreviewView: UIView {
   func attach(session: AVCaptureSession) {
     previewLayer.session = session
     previewLayer.videoGravity = .resizeAspectFill
+    if let sessionStartObserver {
+      NotificationCenter.default.removeObserver(sessionStartObserver)
+    }
+    sessionStartObserver = NotificationCenter.default.addObserver(
+      forName: AVCaptureSession.didStartRunningNotification,
+      object: session,
+      queue: .main
+    ) { [weak self] _ in
+      guard let self else { return }
+      if let connection = self.previewLayer.connection,
+        connection.isVideoRotationAngleSupported(self.videoRotationAngle)
+      {
+        connection.videoRotationAngle = self.videoRotationAngle
+      }
+      self.redrawOverlay()
+    }
   }
 
   func update(detection: LiveRectangleDetection?, gutterRatio: CGFloat?) {
@@ -104,8 +142,11 @@ final class ScannerPreviewView: UIView {
     outline.addLine(to: previewPoint(for: quadrilateral.bottomLeft))
     outline.close()
     quadrilateralLayer.path = outline.cgPath
-    quadrilateralLayer.strokeColor =
-      (detection.isStable ? UIColor.systemGreen : UIColor.systemBlue).cgColor
+    quadrilateralLayer.strokeColor = (
+      detection.requiresRepositioning
+      ? UIColor.systemOrange
+      : detection.isStable ? UIColor.systemGreen : UIColor.systemBlue
+    ).cgColor
 
     if let gutterRatio {
       let top = NormalizedPoint.interpolate(
@@ -127,10 +168,14 @@ final class ScannerPreviewView: UIView {
     }
 
     let stability = Int((detection.stabilityProgress * 100).rounded())
-    accessibilityValue =
-      detection.isStable
-      ? "문서가 안정됨"
-      : "문서 안정화 \(stability)퍼센트"
+    if detection.requiresRepositioning {
+      accessibilityValue = "문서가 화면 밖에 있습니다. 전체가 보이게 이동하세요."
+    } else {
+      accessibilityValue =
+        detection.isStable
+        ? "문서가 안정됨"
+        : "문서 안정화 \(stability)퍼센트"
+    }
   }
 
   private func previewPoint(for point: NormalizedPoint) -> CGPoint {

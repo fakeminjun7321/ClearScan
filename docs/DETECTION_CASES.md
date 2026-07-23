@@ -46,6 +46,26 @@ Book-spread inference is enabled only in `책 2페이지` mode. It requires:
 Uniform images do not activate the fallback. Single-page mode continues to
 reject unsafe border-filling candidates.
 
+## Partially clipped single page
+
+When a single page crosses a frame edge, the detector may keep the visible
+quadrilateral so the user can understand what it found and can still use
+manual capture/crop. It marks the candidate unsafe when two or more corners
+touch or nearly touch the frame:
+
+- the outline changes to orange;
+- the automatic-capture progress ring resets to zero;
+- the UI asks the user to move until the complete document is visible;
+- every agreeing sample must be safe before automatic capture can resume.
+
+This prevents one newly safe frame from reusing an older clipped-frame
+consensus. A separate oldest-to-newest span check prevents slow continuous
+drift from completing the ring.
+
+The matrix in `DetectionConditionMatrixTests` uses deterministic synthetic
+images. Set `CLEARSCAN_TEST_ARTIFACTS` to a directory to save the exact PNG
+inputs during a local test run.
+
 ## Still required
 
 Offline image replay proves candidate selection and gutter estimation only. It

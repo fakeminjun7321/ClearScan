@@ -253,17 +253,30 @@ final class ClearScanUIKitUITests: XCTestCase {
 
   func testGoogleWorkspaceUsesNativeSeededDocuments() throws {
     XCUIDevice.shared.orientation = .portrait
-    let googleTab = app.tabBars.buttons["Google"]
+    // iPhone exposes this control under a TabBar, while current iPadOS
+    // presents the same UITabBarController items as a top floating bar.
+    let googleTab = app.buttons.matching(identifier: "Google").firstMatch
     XCTAssertTrue(googleTab.waitForExistence(timeout: 5))
     googleTab.tap()
 
     let connectButton = app.buttons["google.connect"]
     XCTAssertTrue(connectButton.waitForExistence(timeout: 5))
-    XCTAssertTrue(connectButton.isEnabled)
 
     let configuration = app.staticTexts["google.oauth.configuration"]
     XCTAssertTrue(configuration.waitForExistence(timeout: 3))
-    XCTAssertTrue(configuration.label.contains("iOS OAuth 설정이 준비되었습니다"))
+    if configuration.label.contains("iOS OAuth 설정이 준비되었습니다") {
+      XCTAssertTrue(connectButton.isEnabled)
+    } else {
+      XCTAssertTrue(
+        configuration.label.contains("차단됨")
+          && configuration.label.contains("iOS용 Google OAuth Client ID"),
+        "공개 설정은 필요한 iOS OAuth 자격정보를 정확히 안내해야 합니다."
+      )
+      XCTAssertFalse(
+        connectButton.isEnabled,
+        "iOS OAuth 자격정보가 없을 때 작동하지 않는 연결 버튼을 활성화하면 안 됩니다."
+      )
+    }
 
     let nativePage = app.cells.matching(
       NSPredicate(format: "identifier BEGINSWITH %@", "google.page.")

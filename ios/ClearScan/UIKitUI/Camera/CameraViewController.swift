@@ -90,19 +90,7 @@ final class CameraViewController: UIViewController {
 
   private func updateVideoRotationIfNeeded() {
     guard let orientation = view.window?.windowScene?.interfaceOrientation else { return }
-    let angle: CGFloat
-    switch orientation {
-    case .portrait:
-      angle = 90
-    case .portraitUpsideDown:
-      angle = 270
-    case .landscapeLeft:
-      angle = 0
-    case .landscapeRight:
-      angle = 180
-    default:
-      angle = 90
-    }
+    let angle = ScannerPreviewView.preferredVideoRotationAngle(for: orientation)
     guard appliedVideoRotationAngle != angle else { return }
     appliedVideoRotationAngle = angle
     previewView.updateVideoRotationAngle(angle)
@@ -400,7 +388,9 @@ final class CameraViewController: UIViewController {
     let progress = autoEnabled ? detection?.stabilityProgress ?? 0 : 0
     let clampedProgress = min(max(progress, 0), 1)
     let color: UIColor
-    if detection?.isStable == true {
+    if detection?.requiresRepositioning == true {
+      color = .systemOrange
+    } else if detection?.isStable == true {
       color = .systemGreen
     } else if autoEnabled {
       color = .systemBlue
@@ -420,9 +410,13 @@ final class CameraViewController: UIViewController {
     CATransaction.commit()
 
     shutterButton.accessibilityValue =
-      autoEnabled
-      ? "자동 촬영 \(Int(clampedProgress * 100))%"
-      : "자동 촬영 꺼짐"
+      if detection?.requiresRepositioning == true {
+        "문서 전체가 보이도록 카메라를 이동하세요"
+      } else if autoEnabled {
+        "자동 촬영 \(Int(clampedProgress * 100))%"
+      } else {
+        "자동 촬영 꺼짐"
+      }
   }
 
   private func configureBookControls() {
@@ -568,7 +562,11 @@ final class CameraViewController: UIViewController {
     case .searching:
       statusLabel.text = "문서 찾는 중 · \(scanner.analysisDiagnostics.statusText)"
     case .stabilizing(let progress):
-      statusLabel.text = "고정해 주세요 · \(Int(progress * 100))%"
+      if scanner.liveDetection?.requiresRepositioning == true {
+        statusLabel.text = "문서 전체가 보이게 이동해 주세요"
+      } else {
+        statusLabel.text = "고정해 주세요 · \(Int(progress * 100))%"
+      }
     case .ready:
       statusLabel.text = scanner.autoCaptureEnabled ? "자동 촬영 준비됨" : "촬영 준비됨"
     case .countdown(let remainingSeconds):

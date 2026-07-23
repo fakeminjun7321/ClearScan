@@ -307,17 +307,22 @@ public struct LiveRectangleDetection: Equatable, Sendable {
     public let confidence: Float
     public let stabilityProgress: CGFloat
     public let isStable: Bool
+    /// The outline is useful for framing, but one or more document edges are
+    /// outside the camera frame so automatic capture must stay disabled.
+    public let requiresRepositioning: Bool
 
     public init(
         quadrilateral: DocumentQuadrilateral,
         confidence: Float,
         stabilityProgress: CGFloat,
-        isStable: Bool
+        isStable: Bool,
+        requiresRepositioning: Bool = false
     ) {
         self.quadrilateral = quadrilateral
         self.confidence = confidence
         self.stabilityProgress = min(max(stabilityProgress, 0), 1)
         self.isStable = isStable
+        self.requiresRepositioning = requiresRepositioning
     }
 }
 

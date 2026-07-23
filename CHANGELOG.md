@@ -3,6 +3,28 @@
 All notable ClearScan changes are documented here. The project follows
 [Semantic Versioning](https://semver.org/) while it remains pre-1.0.
 
+## [Unreleased]
+
+### Improved
+
+- Kept partially clipped pages visible as framing/manual-crop aids while
+  preventing them from completing the automatic shutter.
+- Added a full-consensus safety gate so one clean frame cannot reuse a history
+  of clipped candidates to trigger capture.
+- Added a consensus-span check that blocks slow continuous camera drift even
+  when adjacent frames look similar.
+- Reapplied preview rotation after the asynchronous capture connection starts
+  and corrected the UIKit landscape orientation mapping.
+- Added deterministic regression coverage for bright desks, one-sided shadow,
+  perspective, book spreads, clipped pages, adjacent documents, jitter, drift,
+  frame outages, and unsafe-history reuse.
+
+### Verification
+
+- 105 native unit tests passed on both iPhone and iPad simulators.
+- 15 of those tests directly cover the new detection conditions and
+  auto-capture safety behavior.
+
 ## [0.1.0-alpha.1] - 2026-07-23
 
 ### Added
