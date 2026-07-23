@@ -43,4 +43,5 @@ references/
 tmp/
 
 # Host-specific deployment metadata
-.openai/
+.openai/*
+!.openai/hosting.json

@@ -22,8 +22,8 @@ jobs:
       - run: npm run check:runtime
       - run: npm run check:web
       - run: npm run test:backend
-      - run: npm run test:sites
       - run: npm run build
+      - run: npm run test:sites
       - run: npm run test:web
       - run: MOBILE_RUNTIME_TEST_PORT=4197 npm run test:runtime
 
